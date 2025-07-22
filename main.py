@@ -11,6 +11,8 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 import tempfile
+from jinja2 import Environment, StrictUndefined, Undefined
+
 
 app = FastAPI()
 
@@ -94,7 +96,12 @@ async def generar_plantilla(data: FormData):
         temp_path = tmp.name
 
     doc = DocxTemplate(temp_path)
-    doc.render(data.dict())
+    context = data.dict()
+
+# Configurar entorno para que ignore variables faltantes
+    jinja_env = Environment(undefined=Undefined)
+    doc.render(context, jinja_env)
+
 
     salida = os.path.join(tempfile.gettempdir(), f"plantilla_{cedula}.docx")
     doc.save(salida)
