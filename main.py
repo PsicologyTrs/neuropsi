@@ -17,10 +17,12 @@ app = FastAPI()
 # Permitir peticiones desde cualquier origen (Netlify)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://dashing-concha-6e359a.netlify.app"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
 
 # Configuración
 CARPETA_ORIGEN = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"
@@ -59,7 +61,6 @@ class FormData(BaseModel):
 async def generar_plantilla(data: FormData):
     cedula = data.cedula_form.strip()
 
-    # Si antecedente_form es 'true', usar valores por defecto
     if data.antecedente_form.lower() == "true":
         data.hist_form = "04/2025 TAC de cráneo simple (NORMAL), seguimiento por neurología"
         data.ant_lab_form = "Empleada en oficios varios"
@@ -68,7 +69,6 @@ async def generar_plantilla(data: FormData):
     elif data.antecedente_form.lower() == "false":
         data.hist_form = data.ant_lab_form = data.ant_per_form = data.ant_farma_form = "N/A"
 
-    # Buscar archivo base en la carpeta de plantillas
     resultados = drive_service.files().list(
         q=f"'{CARPETA_ORIGEN}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
@@ -80,7 +80,7 @@ async def generar_plantilla(data: FormData):
 
     file_id = archivos[0]["id"]
 
-    # Descargar plantilla a memoria
+    # Descargar
     fh = io.BytesIO()
     request = drive_service.files().get_media(fileId=file_id)
     downloader = MediaIoBaseDownload(fh, request)
@@ -93,7 +93,6 @@ async def generar_plantilla(data: FormData):
         tmp.write(fh.read())
         temp_path = tmp.name
 
-    # Renderizar plantilla
     doc = DocxTemplate(temp_path)
     doc.render(data.dict())
 
@@ -106,7 +105,13 @@ async def generar_plantilla(data: FormData):
         'parents': [CARPETA_DESTINO]
     }
     media = MediaFileUpload(salida, mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    drive_service.files().create(body=metadata, media_body=media).execute()
+    uploaded_file = drive_service.files().create(body=metadata, media_body=media, fields="id").execute()
 
-    return {"mensaje": "✅ Plantilla generada correctamente", "cedula": cedula}
+    enlace = f"https://drive.google.com/file/d/{uploaded_file['id']}/preview"
+
+    return {
+        "mensaje": "✅ Plantilla generada correctamente",
+        "cedula": cedula,
+        "link": enlace
+    }
 
