@@ -100,7 +100,7 @@ async def generar_plantilla(data: FormData):
 
 # Configurar entorno para que ignore variables faltantes
     jinja_env = Environment(undefined=Undefined)
-    doc.render(context, jinja_env)
+    doc.render(context, jinja_env=jinja_env)
 
 
     salida = os.path.join(tempfile.gettempdir(), f"plantilla_{cedula}.docx")
