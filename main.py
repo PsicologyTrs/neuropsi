@@ -1,9 +1,8 @@
-# main.py
 import os
 import json
 import io
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from docxtpl import DocxTemplate
@@ -11,12 +10,10 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 import tempfile
-from jinja2 import Environment, StrictUndefined, Undefined
-
 
 app = FastAPI()
 
-# Permitir peticiones desde cualquier origen (Netlify)
+# Permitir peticiones desde Netlify
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://dashing-concha-6e359a.netlify.app"],
@@ -25,12 +22,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-
-# Configuración
 CARPETA_ORIGEN = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"
 CARPETA_DESTINO = "18hU5uw1WuvuOPAKpL_nNEiO5G7GR65hC"
 
-# Cargar credenciales desde variable de entorno
+# Cargar credenciales
 creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
 creds = service_account.Credentials.from_service_account_info(
     creds_dict,
@@ -71,37 +66,79 @@ async def generar_plantilla(data: FormData):
     elif data.antecedente_form.lower() == "false":
         data.hist_form = data.ant_lab_form = data.ant_per_form = data.ant_farma_form = "N/A"
 
+    # Variables extra con su propio nombre
+    extra_variables = {
+        "PD": {
+            "Tiempo": "{{PD.Tiempo}}",
+            "Lugar": "{{PD.Lugar}}",
+            "Persona": "{{PD.Persona}}",
+            "Espontanea": "{{PD.Espontanea}}",
+            "Por_categorias": "{{PD.Por_categorias}}",
+            "Reconocimiento": "{{PD.Reconocimiento}}",
+            "Digitos": "{{PD.Digitos}}",
+            "Deteccion_visual": "{{PD.Deteccion_visual}}",
+            "Veinte": "{{PD.Veinte}}",
+            "Fluidez_verbal_semantica": "{{PD.Fluidez_verbal_semantica}}",
+            "Fluidez_verbal_fonologica": "{{PD.Fluidez_verbal_fonologica}}",
+            "Denominacion": "{{PD.Denominacion}}",
+            "Comprension": "{{PD.Comprension}}",
+            "Repeticion": "{{PD.Repeticion}}",
+            "Semejanzas": "{{PD.Semejanzas}}",
+            "Calculo": "{{PD.Calculo}}"
+        },
+        "DATOS_GENERALES": {
+            "lectura": "{{DATOS_GENERALES.lectura}}",
+            "dictado": "{{DATOS_GENERALES.dictado}}",
+            "secuenciacion": "{{DATOS_GENERALES.secuenciacion}}"
+        },
+        "Suma": {
+            "Motoras": "{{Suma.Motoras}}"
+        },
+        "RESULTADO_Orientacion": "{{RESULTADO_Orientacion}}",
+        "RESULTADO_Espontanea": "{{RESULTADO_Espontanea}}",
+        "RESULTADO_categorias": "{{RESULTADO_categorias}}",
+        "RESULTADO_Reconocimiento": "{{RESULTADO_Reconocimiento}}",
+        "RESULTADO_Digitos": "{{RESULTADO_Digitos}}",
+        "RESULTADO_Deteccion_visual": "{{RESULTADO_Deteccion_visual}}",
+        "RESULTADO_Veinte": "{{RESULTADO_Veinte}}",
+        "RESULTADO_Fluidez_verbal_semantica": "{{RESULTADO_Fluidez_verbal_semantica}}",
+        "RESULTADO_Fluidez_verbal_fonologica": "{{RESULTADO_Fluidez_verbal_fonologica}}",
+        "RESULTADO_Denominacion": "{{RESULTADO_Denominacion}}",
+        "RESULTADO_Compresion": "{{RESULTADO_Compresion}}",
+        "RESULTADO_Repeticion": "{{RESULTADO_Repeticion}}",
+        "RESULTADO_Lectura": "{{RESULTADO_Lectura}}",
+        "RESULTADO_dictado": "{{RESULTADO_dictado}}",
+        "RESULTADO_Semejanzas": "{{RESULTADO_Semejanzas}}",
+        "RESULTADO_Calculo": "{{RESULTADO_Calculo}}",
+        "RESULTADO_secuenciacion": "{{RESULTADO_secuenciacion}}",
+        "RESULTADO_Suma_Motoras": "{{RESULTADO_Suma_Motoras}}"
+    }
+
+    # Descargar plantilla
     resultados = drive_service.files().list(
         q=f"'{CARPETA_ORIGEN}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
     ).execute()
     archivos = resultados.get("files", [])
-
     if not archivos:
         return JSONResponse(status_code=404, content={"error": "No se encontró plantilla base."})
 
     file_id = archivos[0]["id"]
-
-    # Descargar
     fh = io.BytesIO()
     request = drive_service.files().get_media(fileId=file_id)
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     while not done:
         _, done = downloader.next_chunk()
-
     fh.seek(0)
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
         tmp.write(fh.read())
         temp_path = tmp.name
 
     doc = DocxTemplate(temp_path)
-    context = data.dict()
-
-# Configurar entorno para que ignore variables faltantes
-    jinja_env = Environment(undefined=Undefined)
-    doc.render(context, jinja_env=jinja_env)
-
+    context = {**extra_variables, **data.dict()}
+    doc.render(context)
 
     salida = os.path.join(tempfile.gettempdir(), f"plantilla_{cedula}.docx")
     doc.save(salida)
@@ -121,4 +158,3 @@ async def generar_plantilla(data: FormData):
         "cedula": cedula,
         "link": enlace
     }
-
