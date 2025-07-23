@@ -143,49 +143,49 @@ async def generar_plantilla(data: FormData):
 
     extra_variables = {
     "PD": {
-        "Tiempo": "{% raw %}{{PD.Tiempo}}{% endraw %}",
-        "Lugar": "{% raw %}{{PD.Lugar}}{% endraw %}",
-        "Persona": "{% raw %}{{PD.Persona}}{% endraw %}",
-        "Espontanea": "{% raw %}{{PD.Espontanea}}{% endraw %}",
-        "Por_categorias": "{% raw %}{{PD.Por_categorias}}{% endraw %}",
-        "Reconocimiento": "{% raw %}{{PD.Reconocimiento}}{% endraw %}",
-        "Digitos": "{% raw %}{{PD.Digitos}}{% endraw %}",
-        "Deteccion_visual": "{% raw %}{{PD.Deteccion_visual}}{% endraw %}",
-        "Veinte": "{% raw %}{{PD.Veinte}}{% endraw %}",
-        "Fluidez_verbal_semantica": "{% raw %}{{PD.Fluidez_verbal_semantica}}{% endraw %}",
-        "Fluidez_verbal_fonologica": "{% raw %}{{PD.Fluidez_verbal_fonologica}}{% endraw %}",
-        "Denominacion": "{% raw %}{{PD.Denominacion}}{% endraw %}",
-        "Comprension": "{% raw %}{{PD.Comprension}}{% endraw %}",
-        "Repeticion": "{% raw %}{{PD.Repeticion}}{% endraw %}",
-        "Semejanzas": "{% raw %}{{PD.Semejanzas}}{% endraw %}",
-        "Calculo": "{% raw %}{{PD.Calculo}}{% endraw %}"
+        "Tiempo": "{{PD.Tiempo}}",
+        "Lugar": "{{PD.Lugar}}",
+        "Persona": "{{PD.Persona}}",
+        "Espontanea": "{{PD.Espontanea}}",
+        "Por_categorias": "{{PD.Por_categorias}}",
+        "Reconocimiento": " {{PD.Reconocimiento}}",
+        "Digitos": " {{PD.Digitos}}",
+        "Deteccion_visual": " {{PD.Deteccion_visual}}",
+        "Veinte": " {{PD.Veinte}}",
+        "Fluidez_verbal_semantica": " {{PD.Fluidez_verbal_semantica}}",
+        "Fluidez_verbal_fonologica": " {{PD.Fluidez_verbal_fonologica}}",
+        "Denominacion": " {{PD.Denominacion}}",
+        "Comprension": " {{PD.Comprension}}",
+        "Repeticion": " {{PD.Repeticion}}",
+        "Semejanzas": " {{PD.Semejanzas}}",
+        "Calculo": " {{PD.Calculo}}"
     },
     "DATOS_GENERALES": {
-        "lectura": "{% raw %}{{DATOS_GENERALES.lectura}}{% endraw %}",
-        "dictado": "{% raw %}{{DATOS_GENERALES.dictado}}{% endraw %}",
-        "secuenciacion": "{% raw %}{{DATOS_GENERALES.secuenciacion}}{% endraw %}"
+        "lectura": " {{DATOS_GENERALES.lectura}}",
+        "dictado": " {{DATOS_GENERALES.dictado}}",
+        "secuenciacion": " {{DATOS_GENERALES.secuenciacion}}"
     },
     "Suma": {
-        "Motoras": "{% raw %}{{Suma.Motoras}}{% endraw %}"
+        "Motoras": " {{Suma.Motoras}}"
     },
-    "RESULTADO_Orientacion": "{% raw %}{{RESULTADO_Orientacion}}{% endraw %}",
-    "RESULTADO_Espontanea": "{% raw %}{{RESULTADO_Espontanea}}{% endraw %}",
-    "RESULTADO_categorias": "{% raw %}{{RESULTADO_categorias}}{% endraw %}",
-    "RESULTADO_Reconocimiento": "{% raw %}{{RESULTADO_Reconocimiento}}{% endraw %}",
-    "RESULTADO_Digitos": "{% raw %}{{RESULTADO_Digitos}}{% endraw %}",
-    "RESULTADO_Deteccion_visual": "{% raw %}{{RESULTADO_Deteccion_visual}}{% endraw %}",
-    "RESULTADO_Veinte": "{% raw %}{{RESULTADO_Veinte}}{% endraw %}",
-    "RESULTADO_Fluidez_verbal_semantica": "{% raw %}{{RESULTADO_Fluidez_verbal_semantica}}{% endraw %}",
-    "RESULTADO_Fluidez_verbal_fonologica": "{% raw %}{{RESULTADO_Fluidez_verbal_fonologica}}{% endraw %}",
-    "RESULTADO_Denominacion": "{% raw %}{{RESULTADO_Denominacion}}{% endraw %}",
-    "RESULTADO_Compresion": "{% raw %}{{RESULTADO_Compresion}}{% endraw %}",
-    "RESULTADO_Repeticion": "{% raw %}{{RESULTADO_Repeticion}}{% endraw %}",
-    "RESULTADO_Lectura": "{% raw %}{{RESULTADO_Lectura}}{% endraw %}",
-    "RESULTADO_dictado": "{% raw %}{{RESULTADO_dictado}}{% endraw %}",
-    "RESULTADO_Semejanzas": "{% raw %}{{RESULTADO_Semejanzas}}{% endraw %}",
-    "RESULTADO_Calculo": "{% raw %}{{RESULTADO_Calculo}}{% endraw %}",
-    "RESULTADO_secuenciacion": "{% raw %}{{RESULTADO_secuenciacion}}{% endraw %}",
-    "RESULTADO_Suma_Motoras": "{% raw %}{{RESULTADO_Suma_Motoras}}{% endraw %}"
+    "RESULTADO_Orientacion": " {{RESULTADO_Orientacion}}",
+    "RESULTADO_Espontanea": " {{RESULTADO_Espontanea}}",
+    "RESULTADO_categorias": " {{RESULTADO_categorias}}",
+    "RESULTADO_Reconocimiento": " {{RESULTADO_Reconocimiento}}",
+    "RESULTADO_Digitos": " {{RESULTADO_Digitos}}",
+    "RESULTADO_Deteccion_visual": " {{RESULTADO_Deteccion_visual}}",
+    "RESULTADO_Veinte": " {{RESULTADO_Veinte}}",
+    "RESULTADO_Fluidez_verbal_semantica": " {{RESULTADO_Fluidez_verbal_semantica}}",
+    "RESULTADO_Fluidez_verbal_fonologica": " {{RESULTADO_Fluidez_verbal_fonologica}}",
+    "RESULTADO_Denominacion": " {{RESULTADO_Denominacion}}",
+    "RESULTADO_Compresion": " {{RESULTADO_Compresion}}",
+    "RESULTADO_Repeticion": " {{RESULTADO_Repeticion}}",
+    "RESULTADO_Lectura": " {{RESULTADO_Lectura}}",
+    "RESULTADO_dictado": " {{RESULTADO_dictado}}",
+    "RESULTADO_Semejanzas": " {{RESULTADO_Semejanzas}}",
+    "RESULTADO_Calculo": " {{RESULTADO_Calculo}}",
+    "RESULTADO_secuenciacion": " {{RESULTADO_secuenciacion}}",
+    "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
 }
 
 
