@@ -188,7 +188,6 @@ async def generar_plantilla(data: FormData):
     "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
 }
 
-
     resultados = drive_service.files().list(
         q=f"'{CARPETA_ORIGEN}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
@@ -231,3 +230,8 @@ async def generar_plantilla(data: FormData):
 @app.get("/")
 def read_root():
     return {"status": "Servidor funcionando correctamente!"}
+
+
+@app.api_route("/ping", methods=["GET", "POST", "HEAD", "OPTIONS"])
+async def ping(request: Request):
+    return {"status": "ok"}
