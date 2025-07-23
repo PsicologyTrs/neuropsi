@@ -12,7 +12,8 @@ from docxtpl import DocxTemplate
 from pydantic import BaseModel
 import tempfile
 from datetime import datetime, timedelta
-from google.auth.transport.requests import Request
+from google.auth.transport.requests import Request as GoogleRequest
+
 
 app = FastAPI()
 
@@ -117,7 +118,7 @@ def get_credentials():
     )
 
     if datetime.fromisoformat(token_data['token_expiry']) <= datetime.now():
-        creds.refresh(Request())
+        creds.refresh(GoogleRequest())
         with open(TOKEN_FILE, 'w') as token:
             json.dump({
                 "access_token": creds.token,
