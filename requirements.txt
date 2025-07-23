@@ -1,8 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
+gunicorn
 python-multipart
+requests
 docxtpl
 google-api-python-client
 google-auth
 google-auth-oauthlib
-gunicorn
+google-auth-httplib2
