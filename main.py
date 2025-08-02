@@ -131,18 +131,32 @@ def get_credentials():
 CARPETA_PGP = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"  # PGP SUMIMEDICAL
 CARPETA_MAGISTERIO = "14q4GX6WssQjIoZiHDWWW1UTWdiSe0Unw"  # MAGISTERIO
 
+CARPETA_PGP = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"         # PGP SUMIMEDICAL
+CARPETA_MAGISTERIO = "14q4GX6WssQjIoZiHDWWW1UTWdiSe0Unw"  # MAGISTERIO
+
 @app.post("/generar")
 async def generar_plantilla(data: FormData):
     creds = get_credentials()
     drive_service = build("drive", "v3", credentials=creds)
     cedula = data.cedula_form.strip()
 
-    # === Selecciona la carpeta de plantillas según la entidad ===
-    entidad = (data.entidad_form or "").strip().upper()
-    if entidad == "MAGISTERIO":
+    # === Analiza la opción elegida ===
+    opcion = (data.entidad_form or "").strip().upper()
+
+    # Para la plantilla: solo MAGISTERIO o PGP SUMIMEDICAL
+    if opcion.startswith("MAGISTERIO"):
+        entidad_plantilla = "MAGISTERIO"
+    else:
+        entidad_plantilla = "PGP SUMIMEDICAL"
+
+    # Para la carpeta: SONRISA va a PGP, NORTE va a MAGISTERIO
+    if opcion.endswith("_SONRISA"):
+        carpeta_origen = CARPETA_PGP
+    elif opcion.endswith("_NORTE"):
         carpeta_origen = CARPETA_MAGISTERIO
     else:
-        carpeta_origen = CARPETA_PGP  # Por defecto PGP SUMIMEDICAL
+        # Por defecto, puedes enviar a PGP
+        carpeta_origen = CARPETA_PGP
 
     extra_variables = {
         "PD": {
@@ -191,6 +205,10 @@ async def generar_plantilla(data: FormData):
         "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
     }
 
+    # Mezcla los datos y sobreescribe entidad_form para la plantilla
+    context = {**extra_variables, **data.dict()}
+    context["entidad_form"] = entidad_plantilla
+
     resultados = drive_service.files().list(
         q=f"'{carpeta_origen}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
@@ -213,7 +231,6 @@ async def generar_plantilla(data: FormData):
         temp_path = tmp.name
 
     doc = DocxTemplate(temp_path)
-    context = {**extra_variables, **data.dict()}
     doc.render(context)
 
     salida = os.path.join(tempfile.gettempdir(), f"plantilla_{cedula}.docx")
