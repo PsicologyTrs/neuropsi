@@ -19,7 +19,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://dashing-concha-6e359a.netlify.app"],
+    allow_origins=["https://neuropsitrs.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
