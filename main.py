@@ -14,7 +14,6 @@ import tempfile
 from datetime import datetime, timedelta
 from google.auth.transport.requests import Request as GoogleRequest
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -54,6 +53,7 @@ class FormData(BaseModel):
     ant_lab_form: str
     ant_per_form: str
     ant_farma_form: str
+    ant_acade_form: str     # <--- ¡AQUÍ ESTÁ LA VARIABLE FALTANTE!
     antecedente_form: str
 
 @app.get('/login')
@@ -134,60 +134,55 @@ async def generar_plantilla(data: FormData):
     drive_service = build("drive", "v3", credentials=creds)
     cedula = data.cedula_form.strip()
 
-    if data.antecedente_form.lower() == "true":
-        data.hist_form = "04/2025 TAC de cráneo simple (NORMAL), seguimiento por neurología"
-        data.ant_lab_form = "Empleada en oficios varios"
-        data.ant_per_form = "Red de apoyo estable"
-        data.ant_farma_form = "Eszoplicona, fluoxetina, vitamina b12, levotiroxina, e ibersartan"
-    else:
-        data.hist_form = data.ant_lab_form = data.ant_per_form = data.ant_farma_form = "N/A"
+    # ----- N O T A -----
+    # Ya NO se sobreescriben los antecedentes, se respeta lo que manda el frontend
 
     extra_variables = {
-    "PD": {
-        "Tiempo": "{{PD.Tiempo}}",
-        "Lugar": "{{PD.Lugar}}",
-        "Persona": "{{PD.Persona}}",
-        "Espontanea": "{{PD.Espontanea}}",
-        "Por_categorias": "{{PD.Por_categorias}}",
-        "Reconocimiento": " {{PD.Reconocimiento}}",
-        "Digitos": " {{PD.Digitos}}",
-        "Deteccion_visual": " {{PD.Deteccion_visual}}",
-        "Veinte": " {{PD.Veinte}}",
-        "Fluidez_verbal_semantica": " {{PD.Fluidez_verbal_semantica}}",
-        "Fluidez_verbal_fonologica": " {{PD.Fluidez_verbal_fonologica}}",
-        "Denominacion": " {{PD.Denominacion}}",
-        "Comprension": " {{PD.Comprension}}",
-        "Repeticion": " {{PD.Repeticion}}",
-        "Semejanzas": " {{PD.Semejanzas}}",
-        "Calculo": " {{PD.Calculo}}"
-    },
-    "DATOS_GENERALES": {
-        "lectura": " {{DATOS_GENERALES.lectura}}",
-        "dictado": " {{DATOS_GENERALES.dictado}}",
-        "secuenciacion": " {{DATOS_GENERALES.secuenciacion}}"
-    },
-    "Suma": {
-        "Motoras": " {{Suma.Motoras}}"
-    },
-    "RESULTADO_Orientacion": " {{RESULTADO_Orientacion}}",
-    "RESULTADO_Espontanea": " {{RESULTADO_Espontanea}}",
-    "RESULTADO_categorias": " {{RESULTADO_categorias}}",
-    "RESULTADO_Reconocimiento": " {{RESULTADO_Reconocimiento}}",
-    "RESULTADO_Digitos": " {{RESULTADO_Digitos}}",
-    "RESULTADO_Deteccion_visual": " {{RESULTADO_Deteccion_visual}}",
-    "RESULTADO_Veinte": " {{RESULTADO_Veinte}}",
-    "RESULTADO_Fluidez_verbal_semantica": " {{RESULTADO_Fluidez_verbal_semantica}}",
-    "RESULTADO_Fluidez_verbal_fonologica": " {{RESULTADO_Fluidez_verbal_fonologica}}",
-    "RESULTADO_Denominacion": " {{RESULTADO_Denominacion}}",
-    "RESULTADO_Compresion": " {{RESULTADO_Compresion}}",
-    "RESULTADO_Repeticion": " {{RESULTADO_Repeticion}}",
-    "RESULTADO_Lectura": " {{RESULTADO_Lectura}}",
-    "RESULTADO_dictado": " {{RESULTADO_dictado}}",
-    "RESULTADO_Semejanzas": " {{RESULTADO_Semejanzas}}",
-    "RESULTADO_Calculo": " {{RESULTADO_Calculo}}",
-    "RESULTADO_secuenciacion": " {{RESULTADO_secuenciacion}}",
-    "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
-}
+        "PD": {
+            "Tiempo": "{{PD.Tiempo}}",
+            "Lugar": "{{PD.Lugar}}",
+            "Persona": "{{PD.Persona}}",
+            "Espontanea": "{{PD.Espontanea}}",
+            "Por_categorias": "{{PD.Por_categorias}}",
+            "Reconocimiento": " {{PD.Reconocimiento}}",
+            "Digitos": " {{PD.Digitos}}",
+            "Deteccion_visual": " {{PD.Deteccion_visual}}",
+            "Veinte": " {{PD.Veinte}}",
+            "Fluidez_verbal_semantica": " {{PD.Fluidez_verbal_semantica}}",
+            "Fluidez_verbal_fonologica": " {{PD.Fluidez_verbal_fonologica}}",
+            "Denominacion": " {{PD.Denominacion}}",
+            "Comprension": " {{PD.Comprension}}",
+            "Repeticion": " {{PD.Repeticion}}",
+            "Semejanzas": " {{PD.Semejanzas}}",
+            "Calculo": " {{PD.Calculo}}"
+        },
+        "DATOS_GENERALES": {
+            "lectura": " {{DATOS_GENERALES.lectura}}",
+            "dictado": " {{DATOS_GENERALES.dictado}}",
+            "secuenciacion": " {{DATOS_GENERALES.secuenciacion}}"
+        },
+        "Suma": {
+            "Motoras": " {{Suma.Motoras}}"
+        },
+        "RESULTADO_Orientacion": " {{RESULTADO_Orientacion}}",
+        "RESULTADO_Espontanea": " {{RESULTADO_Espontanea}}",
+        "RESULTADO_categorias": " {{RESULTADO_categorias}}",
+        "RESULTADO_Reconocimiento": " {{RESULTADO_Reconocimiento}}",
+        "RESULTADO_Digitos": " {{RESULTADO_Digitos}}",
+        "RESULTADO_Deteccion_visual": " {{RESULTADO_Deteccion_visual}}",
+        "RESULTADO_Veinte": " {{RESULTADO_Veinte}}",
+        "RESULTADO_Fluidez_verbal_semantica": " {{RESULTADO_Fluidez_verbal_semantica}}",
+        "RESULTADO_Fluidez_verbal_fonologica": " {{RESULTADO_Fluidez_verbal_fonologica}}",
+        "RESULTADO_Denominacion": " {{RESULTADO_Denominacion}}",
+        "RESULTADO_Compresion": " {{RESULTADO_Compresion}}",
+        "RESULTADO_Repeticion": " {{RESULTADO_Repeticion}}",
+        "RESULTADO_Lectura": " {{RESULTADO_Lectura}}",
+        "RESULTADO_dictado": " {{RESULTADO_dictado}}",
+        "RESULTADO_Semejanzas": " {{RESULTADO_Semejanzas}}",
+        "RESULTADO_Calculo": " {{RESULTADO_Calculo}}",
+        "RESULTADO_secuenciacion": " {{RESULTADO_secuenciacion}}",
+        "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
+    }
 
     resultados = drive_service.files().list(
         q=f"'{CARPETA_ORIGEN}' in parents and name contains '.docx' and trashed = false",
@@ -226,12 +221,11 @@ async def generar_plantilla(data: FormData):
     os.remove(salida)
     os.remove(temp_path)
 
-    return {"mensaje":"✅ Plantilla generada correctamente","cedula":cedula,"link":enlace}
+    return {"mensaje": "✅ Plantilla generada correctamente", "cedula": cedula, "link": enlace}
 
 @app.get("/")
 def read_root():
     return {"status": "Servidor funcionando correctamente!"}
-
 
 @app.api_route("/ping", methods=["GET", "POST", "HEAD", "OPTIONS"])
 async def ping(request: Request):
