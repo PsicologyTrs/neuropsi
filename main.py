@@ -128,14 +128,21 @@ def get_credentials():
 
     return creds
 
+CARPETA_PGP = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"  # PGP SUMIMEDICAL
+CARPETA_MAGISTERIO = "14q4GX6WssQjIoZiHDWWW1UTWdiSe0Unw"  # MAGISTERIO
+
 @app.post("/generar")
 async def generar_plantilla(data: FormData):
     creds = get_credentials()
     drive_service = build("drive", "v3", credentials=creds)
     cedula = data.cedula_form.strip()
 
-    # ----- N O T A -----
-    # Ya NO se sobreescriben los antecedentes, se respeta lo que manda el frontend
+    # === Selecciona la carpeta de plantillas según la entidad ===
+    entidad = (data.entidad_form or "").strip().upper()
+    if entidad == "MAGISTERIO":
+        carpeta_origen = CARPETA_MAGISTERIO
+    else:
+        carpeta_origen = CARPETA_PGP  # Por defecto PGP SUMIMEDICAL
 
     extra_variables = {
         "PD": {
@@ -185,13 +192,13 @@ async def generar_plantilla(data: FormData):
     }
 
     resultados = drive_service.files().list(
-        q=f"'{CARPETA_ORIGEN}' in parents and name contains '.docx' and trashed = false",
+        q=f"'{carpeta_origen}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
     ).execute()
 
     archivos = resultados.get("files", [])
     if not archivos:
-        return JSONResponse(status_code=404, content={"error": "No se encontró plantilla base."})
+        return JSONResponse(status_code=404, content={"error": "No se encontró plantilla base para esta entidad."})
 
     file_id = archivos[0]["id"]
     fh = io.BytesIO()
