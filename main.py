@@ -24,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI')
@@ -260,3 +261,12 @@ async def generar_plantilla(data: FormData):
     os.remove(temp_path)
 
     return {"mensaje": "✅ Plantilla generada correctamente", "cedula": cedula, "link": enlace}
+
+
+@app.get("/")
+def read_root():
+    return {"status": "Servidor funcionando correctamente!"}
+
+@app.api_route("/ping", methods=["GET", "POST", "HEAD", "OPTIONS"])
+async def ping(request: Request):
+    return {"status": "ok"}
