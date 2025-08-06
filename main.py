@@ -128,11 +128,8 @@ def get_credentials():
 
     return creds
 
-CARPETA_PGP = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"  # PGP SUMIMEDICAL
 CARPETA_MAGISTERIO = "14q4GX6WssQjIoZiHDWWW1UTWdiSe0Unw"  # MAGISTERIO
-
-CARPETA_PGP = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"         # PGP SUMIMEDICAL
-CARPETA_MAGISTERIO = "14q4GX6WssQjIoZiHDWWW1UTWdiSe0Unw"  # MAGISTERIO
+CARPETA_SONRISAS = "18S6rYuwaS1pDuy100K9n4CvojEixFP0u"    # SONRISAS DE ESPERANZA (antes PGP)
 
 @app.post("/generar")
 async def generar_plantilla(data: FormData):
@@ -140,23 +137,23 @@ async def generar_plantilla(data: FormData):
     drive_service = build("drive", "v3", credentials=creds)
     cedula = data.cedula_form.strip()
 
-    # === Analiza la opción elegida ===
-    opcion = (data.entidad_form or "").strip().upper()
-
-    # Para la plantilla: solo MAGISTERIO o PGP SUMIMEDICAL
-    if opcion.startswith("MAGISTERIO"):
-        entidad_plantilla = "MAGISTERIO"
-    else:
-        entidad_plantilla = "PGP SUMIMEDICAL"
-
-    # Para la carpeta: SONRISA va a PGP, NORTE va a MAGISTERIO
-    if opcion.endswith("_SONRISA"):
-        carpeta_origen = CARPETA_PGP
-    elif opcion.endswith("_NORTE"):
+    # Mapeo de entidad_form a carpeta y a lo que va en el Word
+    entidad = (data.entidad_form or "").strip()
+    if entidad == "Magisterio_Norte":
         carpeta_origen = CARPETA_MAGISTERIO
+        entidad_plantilla = "MAGISTERIO"
+    elif entidad == "Cetin_Norte":
+        carpeta_origen = CARPETA_MAGISTERIO
+        entidad_plantilla = "MAGISTERIO/ CETIN"
+    elif entidad == "PGP_Norte":
+        carpeta_origen = CARPETA_MAGISTERIO
+        entidad_plantilla = "PGP SUMIMEDICAL"
+    elif entidad == "Sonrisa_esperanza":
+        carpeta_origen = CARPETA_SONRISAS
+        entidad_plantilla = "SONRISAS DE ESPERANZA"
     else:
-        # Por defecto, puedes enviar a PGP
-        carpeta_origen = CARPETA_PGP
+        carpeta_origen = CARPETA_MAGISTERIO
+        entidad_plantilla = "MAGISTERIO"
 
     extra_variables = {
         "PD": {
@@ -205,7 +202,7 @@ async def generar_plantilla(data: FormData):
         "RESULTADO_Suma_Motoras": " {{RESULTADO_Suma_Motoras}}"
     }
 
-    # Mezcla los datos y sobreescribe entidad_form para la plantilla
+    # Mezcla los datos y sobreescribe entidad_form para la plantilla Word
     context = {**extra_variables, **data.dict()}
     context["entidad_form"] = entidad_plantilla
 
@@ -242,15 +239,24 @@ async def generar_plantilla(data: FormData):
 
     enlace = f"https://drive.google.com/file/d/{uploaded_file['id']}/preview"
 
+    # Sube el JSON con entidad y nombre
+    datos_json = {
+        "cedula_form": data.cedula_form,
+        "entidad_form": data.entidad_form,
+        "nombre_form": data.nombre_form
+    }
+    json_path = os.path.join(tempfile.gettempdir(), f"plantilla_{cedula}.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(datos_json, f, ensure_ascii=False)
+    metadata_json = {
+        'name': f"plantilla_{cedula}.json",
+        'parents': [CARPETA_DESTINO]
+    }
+    media_json = MediaFileUpload(json_path, mimetype="application/json")
+    drive_service.files().create(body=metadata_json, media_body=media_json, fields="id").execute()
+    os.remove(json_path)
+
     os.remove(salida)
     os.remove(temp_path)
 
     return {"mensaje": "✅ Plantilla generada correctamente", "cedula": cedula, "link": enlace}
-
-@app.get("/")
-def read_root():
-    return {"status": "Servidor funcionando correctamente!"}
-
-@app.api_route("/ping", methods=["GET", "POST", "HEAD", "OPTIONS"])
-async def ping(request: Request):
-    return {"status": "ok"}
