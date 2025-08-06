@@ -40,6 +40,7 @@ class FormData(BaseModel):
     born_date_form: str
     age_form: str
     cedula_form: str
+    tipo_doc_form: str  
     residencia_form: str
     escolaridad: str
     location_form: str
@@ -137,6 +138,8 @@ async def generar_plantilla(data: FormData):
     creds = get_credentials()
     drive_service = build("drive", "v3", credentials=creds)
     cedula = data.cedula_form.strip()
+    tipo_doc = (data.tipo_doc_form or "").strip()
+    cedula_completa = f"{tipo_doc} {cedula}"
 
     # Mapeo de entidad_form a carpeta y a lo que va en el Word
     entidad = (data.entidad_form or "").strip()
@@ -206,7 +209,7 @@ async def generar_plantilla(data: FormData):
     # Mezcla los datos y sobreescribe entidad_form para la plantilla Word
     context = {**extra_variables, **data.dict()}
     context["entidad_form"] = entidad_plantilla
-
+    context["cedula_completa"] = cedula_completa 
     resultados = drive_service.files().list(
         q=f"'{carpeta_origen}' in parents and name contains '.docx' and trashed = false",
         fields="files(id, name)"
